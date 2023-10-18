@@ -1,6 +1,8 @@
-# upl
+# [WIP]upl
 
-upload script.
+upload zip file script.
+
+ブラウザでのファイルアップロードが完全に制限されているクソ環境でファイル転送させるために作った。Tiny File ManagerのエンドポイントにcURLで直にリクエストし、クッキー取得とアップロードを一度にやってくれる。
 
 ## install
 
