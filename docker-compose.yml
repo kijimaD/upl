@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  uploader:
+    image: tigerdockermediocore/tinyfilemanager-docker:2.4.3
+    volumes:
+      - .:/data
+    ports:
+      - 7777:80

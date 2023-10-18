@@ -10,10 +10,10 @@ RUN apt-get update \
 WORKDIR /build
 COPY . .
 
-RUN GO111MODULE=on CGO_ENABLED=0 go build -o ./bin/go_skel \
+RUN GO111MODULE=on CGO_ENABLED=0 go build -o ./bin/upl \
     -ldflags='-w -s -extldflags "-static"' \
     . \
- && upx-ucl --best --ultra-brute ./bin/go_skel
+ && upx-ucl --best --ultra-brute ./bin/upl
 
 ###########
 # release #
@@ -21,6 +21,6 @@ RUN GO111MODULE=on CGO_ENABLED=0 go build -o ./bin/go_skel \
 
 FROM gcr.io/distroless/static-debian11:latest AS release
 
-COPY --from=builder /build/bin/go_skel /bin/
+COPY --from=builder /build/bin/upl /bin/
 WORKDIR /workdir
-ENTRYPOINT ["/bin/go_skel"]
+ENTRYPOINT ["/bin/upl"]
