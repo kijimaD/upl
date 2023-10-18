@@ -7,9 +7,10 @@ import (
 )
 
 var (
-	COMMAND     = "curl"
-	BASEURL     = "http://localhost:7777"
-	VERBOSE_OPT = "--trace-ascii -"
+	COMMAND       = "curl"
+	BASEURL       = "http://localhost:7777"
+	VERBOSE_OPT   = "--trace-ascii -"
+	UPLOAD_TARGET = "upload.zip"
 )
 
 func buildUpload(cookie string) string {
@@ -33,13 +34,15 @@ func buildUpload(cookie string) string {
   -H 'sec-ch-ua-platform: "Linux"' \
   --compressed \
   -F "p=" \
-  -F "fullpath=upload.zip" \
-  -F "file=@upload.zip;type=application/zip"`
+  -F "fullpath=%s" \
+  -F "file=@%s;type=application/zip"`
 	cmd := fmt.Sprintf(basecmd,
 		COMMAND,
 		BASEURL,
 		VERBOSE_OPT,
 		cookie,
+		UPLOAD_TARGET,
+		UPLOAD_TARGET,
 	)
 	return cmd
 }
@@ -53,12 +56,11 @@ func Exec(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-
 	cmd := buildUpload(cookie)
 	result, err := exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
+		fmt.Fprint(out, result, err)
 		return err
 	}
-	fmt.Fprintf(out, string(result))
 	return err
 }

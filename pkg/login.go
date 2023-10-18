@@ -39,7 +39,7 @@ func buildLogin() string {
 func login(out io.Writer) (string, error) {
 	login, err := exec.Command("bash", "-c", buildLogin()).CombinedOutput()
 	if err != nil {
-		fmt.Fprint(out, err)
+		fmt.Fprint(out, login, err)
 		return "", err
 	}
 	return string(login), nil
