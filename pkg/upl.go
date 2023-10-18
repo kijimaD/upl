@@ -14,8 +14,7 @@ var (
 )
 
 func build() string {
-	var basecmd = `
-%s %s \
+	basecmd := `%s %s \
   %s \
   -H 'Accept: application/json' \
   -H 'Accept-Language: ja,en-US;q=0.9,en;q=0.8' \
@@ -36,14 +35,17 @@ func build() string {
   --compressed \
   -F "p=" \
   -F "fullpath=upload.zip" \
-  -F "file=@upload.zip;type=application/zip"
-`
-	cmd := fmt.Sprintf(basecmd, COMMAND, BASEURL, VERBOSE_OPT)
+  -F "file=@upload.zip;type=application/zip"`
+	cmd := fmt.Sprintf(basecmd,
+		COMMAND,
+		BASEURL,
+		VERBOSE_OPT,
+	)
 	return cmd
 }
 
 func buildLogin() string {
-	var basecmd = `curl 'http://localhost:7777/' \
+	basecmd := `curl 'http://localhost:7777/' \
   -s \
   -c - \
   -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
@@ -63,7 +65,6 @@ func buildLogin() string {
   -H 'sec-ch-ua-mobile: ?0' \
   -H 'sec-ch-ua-platform: "Linux"' \
   --data-raw 'fm_usr=admin&fm_pwd=admin%40123'`
-
 	return basecmd
 }
 
