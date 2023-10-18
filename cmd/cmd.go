@@ -19,10 +19,9 @@ func New(out io.Writer) *CLI {
 
 func (cli *CLI) Execute(args []string) error {
 	flag.Parse()
-	err := upl.Exec()
+	err := upl.Exec(cli.Out)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

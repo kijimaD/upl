@@ -2,13 +2,20 @@ package upl
 
 import (
 	"fmt"
+	"io"
 	"os/exec"
 )
 
-var cmd = `
-curl 'http://localhost:7777?p=' \
-  -v \
-  --trace-ascii - \
+var (
+	COMMAND     = "curl"
+	BASEURL     = "http://localhost:7777"
+	VERBOSE_OPT = "--trace-ascii -"
+)
+
+func build() string {
+	var basecmd = `
+%s %s \
+  %s \
   -H 'Accept: application/json' \
   -H 'Accept-Language: ja,en-US;q=0.9,en;q=0.8' \
   -H 'Cache-Control: no-cache' \
@@ -30,13 +37,15 @@ curl 'http://localhost:7777?p=' \
   -F "fullpath=upload.zip" \
   -F "file=@upload.zip;type=application/zip"
 `
+	cmd := fmt.Sprintf(basecmd, COMMAND, BASEURL, VERBOSE_OPT)
+	return cmd
+}
 
-func Exec() error {
-	result, err := exec.Command("bash", "-c", cmd).CombinedOutput()
+func Exec(out io.Writer) error {
+	result, err := exec.Command("bash", "-c", build()).CombinedOutput()
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(result))
-
+	fmt.Fprintf(out, string(result))
 	return err
 }
