@@ -7,6 +7,11 @@ import (
 	"regexp"
 )
 
+const (
+	ADMIN_USER = "admin"
+	PWD        = "admin@123"
+)
+
 func buildLogin() string {
 	basecmd := `%s %s \
   -s \
@@ -27,10 +32,12 @@ func buildLogin() string {
   -H 'sec-ch-ua: "Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"' \
   -H 'sec-ch-ua-mobile: ?0' \
   -H 'sec-ch-ua-platform: "Linux"' \
-  --data-raw 'fm_usr=admin&fm_pwd=admin@123'`
+  --data-raw 'fm_usr=%s&fm_pwd=%s'`
 	cmd := fmt.Sprintf(basecmd,
 		COMMAND,
 		BASEURL,
+		ADMIN_USER,
+		PWD,
 	)
 	return cmd
 }
@@ -39,7 +46,7 @@ func buildLogin() string {
 func login(out io.Writer) (string, error) {
 	login, err := exec.Command("bash", "-c", buildLogin()).CombinedOutput()
 	if err != nil {
-		fmt.Fprint(out, login, err)
+		fmt.Fprint(out, string(login), err)
 		return "", err
 	}
 	return string(login), nil

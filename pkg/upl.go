@@ -16,6 +16,7 @@ var (
 func buildUpload(cookie string) string {
 	basecmd := `%s %s \
   %s \
+  -# \
   -H 'Accept: application/json' \
   -H 'Accept-Language: ja,en-US;q=0.9,en;q=0.8' \
   -H 'Cache-Control: no-cache' \
@@ -59,8 +60,9 @@ func Exec(out io.Writer) error {
 	cmd := buildUpload(cookie)
 	result, err := exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
-		fmt.Fprint(out, result, err)
+		fmt.Fprint(out, string(result), err)
 		return err
 	}
+	// TODO: 途中経過を表示したい
 	return err
 }
