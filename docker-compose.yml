@@ -2,7 +2,9 @@ version: '3.7'
 
 services:
   uploader:
-    image: tigerdockermediocore/tinyfilemanager-docker:2.4.3
+    build:
+      context: .
+      target: filemanager
     volumes:
       - .:/data
     ports:

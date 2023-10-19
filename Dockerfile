@@ -24,3 +24,7 @@ FROM gcr.io/distroless/static-debian11:latest AS release
 COPY --from=builder /build/bin/upl /bin/
 WORKDIR /workdir
 ENTRYPOINT ["/bin/upl"]
+
+FROM tigerdockermediocore/tinyfilemanager-docker:2.4.3 AS filemanager
+
+copy config.php /app/tinyfilemanager/config.php
