@@ -9,21 +9,23 @@ import (
 )
 
 var (
-	COMMAND       = "curl"
-	BASEURL       = "http://localhost:7777"
-	VERBOSE_OPT   = "--trace-ascii -"
-	UPLOAD_TARGET = "upload.zip"
+	DEFAULT_BASEURL = "http://localhost:7777"
+	COMMAND         = "curl"
+	VERBOSE_OPT     = "--trace-ascii -"
+	UPLOAD_TARGET   = "upload.zip"
 )
 
 type Task struct {
-	w  io.Writer
-	mu *sync.RWMutex
+	w       io.Writer
+	mu      *sync.RWMutex
+	baseurl string
 }
 
 func NewTask(w io.Writer) *Task {
 	task := Task{
-		w:  w,
-		mu: &sync.RWMutex{},
+		w:       w,
+		mu:      &sync.RWMutex{},
+		baseurl: DEFAULT_BASEURL,
 	}
 	return &task
 }
@@ -38,7 +40,7 @@ func (t *Task) buildUpload(cookie string) string {
   -F "file=@%s;type=application/zip"`
 	cmd := fmt.Sprintf(basecmd,
 		COMMAND,
-		BASEURL,
+		t.baseurl,
 		cookie,
 		UPLOAD_TARGET,
 		UPLOAD_TARGET,
@@ -47,11 +49,11 @@ func (t *Task) buildUpload(cookie string) string {
 }
 
 func (t *Task) Exec() error {
-	str, err := login(t.w)
+	str, err := t.login()
 	if err != nil {
 		return err
 	}
-	cookie, err := parseCookie(str)
+	cookie, err := t.parseCookie(str)
 	if err != nil {
 		return err
 	}
