@@ -27,4 +27,5 @@ ENTRYPOINT ["/bin/upl"]
 
 FROM tigerdockermediocore/tinyfilemanager-docker:2.4.3 AS filemanager
 
-copy config.php /app/tinyfilemanager/config.php
+copy config.php /app/tinyfilemanager/
+copy php.ini /usr/local/etc/php/
