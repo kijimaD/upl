@@ -20,13 +20,24 @@ type Task struct {
 	baseurl string
 }
 
-func NewTask(w io.Writer) *Task {
+func NewTask(w io.Writer, options ...TaskOption) *Task {
 	task := Task{
 		w:       w,
 		mu:      &sync.RWMutex{},
 		baseurl: DEFAULT_BASEURL,
 	}
+	for _, option := range options {
+		option(&task)
+	}
 	return &task
+}
+
+type TaskOption func(*Task)
+
+func TaskWithBaseurl(baseurl string) TaskOption {
+	return func(t *Task) {
+		t.baseurl = baseurl
+	}
 }
 
 func (t *Task) buildUpload(cookie string) string {
