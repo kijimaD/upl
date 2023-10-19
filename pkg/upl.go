@@ -1,8 +1,10 @@
 package upl
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"runtime"
 	"sync"
@@ -13,6 +15,8 @@ var (
 	COMMAND         = "curl"
 	VERBOSE_OPT     = "--trace-ascii -"
 	UPLOAD_TARGET   = "upload.zip"
+
+	TargetFileNotFoundError = errors.New("カレントディレクトリに upload.zip ファイルが存在しない")
 )
 
 type Task struct {
@@ -60,6 +64,11 @@ func (t *Task) buildUpload(cookie string) string {
 }
 
 func (t *Task) Exec() error {
+	_, err := os.Stat(UPLOAD_TARGET)
+	if err != nil {
+		return TargetFileNotFoundError
+	}
+
 	str, err := t.login()
 	if err != nil {
 		return err
