@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"regexp"
+	"runtime"
 )
 
 const (
@@ -28,7 +29,14 @@ func (t *Task) buildLogin() string {
 
 // cookie jar textを返す
 func (t *Task) login() (string, error) {
-	login, err := exec.Command("bash", "-c", t.buildLogin()).CombinedOutput()
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("cmd", "/C", t.buildLogin())
+	default: // Linux & Mac
+		cmd = exec.Command("sh", "-c", t.buildLogin())
+	}
+	login, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Fprint(t.w, string(login), err)
 		return "", err

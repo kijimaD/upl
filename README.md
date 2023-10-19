@@ -1,4 +1,4 @@
-# [WIP]upl
+# upl
 
 upload zip file script.
 
@@ -10,8 +10,23 @@ upload zip file script.
 $ go install github.com/kijimaD/upl@main
 ```
 
+## how to use
+
+このリポジトリでの設定で動かした Tiny File Manager にアップロードするのを前提としている。
+
+```
+$ docker-compose up -d
+```
+
+実行。カレントディレクトリにある `upload.zip` を指定パスにある Tiny File Manager にアップロードする。
+
+```
+$ upl localhost:7777
+######################################################################## 100.0%
+```
+
 ## docker run
 
 ```
-$ docker run -v "$PWD/":/work -w /work --rm -it ghcr.io/kijimad/upl:latest
+$ docker run -v "$PWD/":/work -w /work --rm -it ghcr.io/kijimad/upl:latest localhost:7777
 ```

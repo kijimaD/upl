@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"runtime"
 	"sync"
 )
 
@@ -68,7 +69,15 @@ func (t *Task) Exec() error {
 		return err
 	}
 	cmdtext := t.buildUpload(cookie)
-	cmd := exec.Command("bash", "-c", cmdtext)
+
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("cmd", "/C", cmdtext)
+	default: // Linux & Mac
+		cmd = exec.Command("sh", "-c", cmdtext)
+	}
+
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return err
