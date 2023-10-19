@@ -1,7 +1,6 @@
 package upl
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os/exec"
@@ -73,27 +72,19 @@ func (t *Task) Exec() error {
 		return err
 	}
 
-	go t.displayOutput(stdout)
-	go t.displayOutput(stderr)
+	go func() {
+		t.mu.Lock()
+		io.Copy(t.w, stderr) // curlのプログレスバーはなぜか標準エラー出力である
+		t.mu.Unlock()
+		// curl の --limit-rate 1m オプションで転送速度を遅くして動作確認できる
+	}()
 
 	err = cmd.Wait()
 	if err != nil {
 		return err
 	}
+	t.mu.Lock()
+	io.Copy(t.w, stdout)
+	t.mu.Unlock()
 	return err
-}
-
-func (t *Task) displayOutput(r io.Reader) {
-	const timerDisplaySyncSec = 100
-	scanner := bufio.NewScanner(r)
-	done := make(chan bool)
-
-	for scanner.Scan() {
-		scannedText := scanner.Text()
-		head := fmt.Sprintf("%s", scannedText)
-		t.mu.Lock()
-		fmt.Fprintf(t.w, "%s\n", head)
-		t.mu.Unlock()
-	}
-	done <- true
 }
