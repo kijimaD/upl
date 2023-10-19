@@ -14,7 +14,8 @@ func TestExec(t *testing.T) {
 	defer os.Remove(file.Name())
 
 	b := &bytes.Buffer{}
-	err = Exec(b)
+	task := NewTask(b)
+	err = task.Exec()
 	if err != nil {
 		t.Error(err)
 	}

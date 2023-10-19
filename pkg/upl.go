@@ -1,9 +1,11 @@
 package upl
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"os/exec"
+	"sync"
 )
 
 var (
@@ -13,9 +15,21 @@ var (
 	UPLOAD_TARGET = "upload.zip"
 )
 
-func buildUpload(cookie string) string {
+type Task struct {
+	w  io.Writer
+	mu *sync.RWMutex
+}
+
+func NewTask(w io.Writer) *Task {
+	task := Task{
+		w:  w,
+		mu: &sync.RWMutex{},
+	}
+	return &task
+}
+
+func (t *Task) buildUpload(cookie string) string {
 	basecmd := `%s %s \
-  %s \
   -# \
   -H 'Cookie: filemanager=%s' \
   --compressed \
@@ -25,7 +39,6 @@ func buildUpload(cookie string) string {
 	cmd := fmt.Sprintf(basecmd,
 		COMMAND,
 		BASEURL,
-		VERBOSE_OPT,
 		cookie,
 		UPLOAD_TARGET,
 		UPLOAD_TARGET,
@@ -33,8 +46,8 @@ func buildUpload(cookie string) string {
 	return cmd
 }
 
-func Exec(out io.Writer) error {
-	str, err := login(out)
+func (t *Task) Exec() error {
+	str, err := login(t.w)
 	if err != nil {
 		return err
 	}
@@ -42,12 +55,43 @@ func Exec(out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	cmd := buildUpload(cookie)
-	result, err := exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmdtext := t.buildUpload(cookie)
+	cmd := exec.Command("bash", "-c", cmdtext)
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		fmt.Fprint(out, string(result), err)
 		return err
 	}
-	// TODO: 途中経過を表示したい
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+
+	go t.displayOutput(stdout)
+	go t.displayOutput(stderr)
+
+	err = cmd.Wait()
+	if err != nil {
+		return err
+	}
 	return err
+}
+
+func (t *Task) displayOutput(r io.Reader) {
+	const timerDisplaySyncSec = 100
+	scanner := bufio.NewScanner(r)
+	done := make(chan bool)
+
+	for scanner.Scan() {
+		scannedText := scanner.Text()
+		head := fmt.Sprintf("%s", scannedText)
+		t.mu.Lock()
+		fmt.Fprintf(t.w, "%s\n", head)
+		t.mu.Unlock()
+	}
+	done <- true
 }
