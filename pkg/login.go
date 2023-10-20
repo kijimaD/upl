@@ -32,7 +32,7 @@ func (t *Task) login() (string, error) {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "windows":
-		cmd = exec.Command("cmd", "/C", t.buildLogin())
+		cmd = exec.Command("powershell", "-Command", t.buildLogin())
 	default: // Linux & Mac
 		cmd = exec.Command("sh", "-c", t.buildLogin())
 	}

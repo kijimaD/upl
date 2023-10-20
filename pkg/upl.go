@@ -82,7 +82,7 @@ func (t *Task) Exec() error {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "windows":
-		cmd = exec.Command("cmd", "/C", cmdtext)
+		cmd = exec.Command("powershell", "-Command", cmdtext)
 	default: // Linux & Mac
 		cmd = exec.Command("sh", "-c", cmdtext)
 	}
