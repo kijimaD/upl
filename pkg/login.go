@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
+	"strings"
 )
 
 const (
@@ -13,11 +14,15 @@ const (
 )
 
 func (t *Task) buildLogin() string {
-	basecmd := `%s %s \
-  -s \
-  -c - \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  --data-raw 'fm_usr=%s&fm_pwd=%s'`
+	basecmds := []string{
+		"%s",
+		"%s",
+		"-s",
+		"-c -",
+		"-H 'Content-Type: application/x-www-form-urlencoded'",
+		"--data-raw 'fm_usr=%s&fm_pwd=%s'",
+	}
+	basecmd := strings.Join(basecmds, " ")
 	cmd := fmt.Sprintf(basecmd,
 		COMMAND,
 		t.baseurl,

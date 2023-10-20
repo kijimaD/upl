@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"sync"
 )
 
@@ -46,13 +47,17 @@ func TaskWithBaseurl(baseurl string) TaskOption {
 }
 
 func (t *Task) buildUpload(cookie string) string {
-	basecmd := `%s %s \
-  -# \
-  -H 'Cookie: filemanager=%s' \
-  --compressed \
-  -F "p=" \
-  -F "fullpath=%s" \
-  -F "file=@%s;type=application/zip"`
+	basecmds := []string{
+		"%s",
+		"%s",
+		"-#",
+		"-H 'Cookie: filemanager=%s'",
+		"--compressed",
+		"-F 'p='",
+		"-F 'fullpath=%s'",
+		"-F 'file=@%s;type=application/zip'",
+	}
+	basecmd := strings.Join(basecmds, " ")
 	cmd := fmt.Sprintf(basecmd,
 		COMMAND,
 		t.baseurl,
