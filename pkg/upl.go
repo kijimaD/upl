@@ -47,10 +47,10 @@ func TaskWithBaseurl(baseurl string) TaskOption {
 	}
 }
 
-func (t *Task) upload(cookie string) error {
+func (t *Task) upload(cookie string) (string, error) {
 	file, err := os.Open(UPLOAD_TARGET)
 	if err != nil {
-		return TargetFileNotFoundError
+		return "", TargetFileNotFoundError
 	}
 	defer file.Close()
 
@@ -67,7 +67,7 @@ func (t *Task) upload(cookie string) error {
 	partHeader.Set("Content-Type", "application/zip")
 	part, err := writer.CreatePart(partHeader)
 	if err != nil {
-		return err
+		return "", err
 	}
 	_, err = io.Copy(part, file)
 	writer.Close()
@@ -75,7 +75,7 @@ func (t *Task) upload(cookie string) error {
 	// リクエストを作成
 	req, err := http.NewRequest("POST", t.baseurl, body)
 	if err != nil {
-		return err
+		return "", err
 	}
 	req.Header.Set("Cookie", fmt.Sprintf("filemanager=%s", cookie))
 	req.Header.Set("Content-Type", "multipart/form-data; boundary="+boundary)
@@ -85,11 +85,15 @@ func (t *Task) upload(cookie string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
-	return nil
+	bodyText, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(bodyText), nil
 }
 
 func (t *Task) Exec() error {
@@ -105,7 +109,7 @@ func (t *Task) Exec() error {
 	if err != nil {
 		return err
 	}
-	err = t.upload(cookie)
+	_, err = t.upload(cookie)
 	if err != nil {
 		return err
 	}
