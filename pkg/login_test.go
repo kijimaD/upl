@@ -22,3 +22,14 @@ func TestLogin(t *testing.T) {
 	}
 	assert.Equal(t, 26, len(cookie))
 }
+
+// できない
+// func TestLogin2(t *testing.T) {
+// 	buf := &bytes.Buffer{}
+// 	task := NewTask(buf)
+// 	cookie, err := task.login2()
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	assert.Equal(t, 26, len(cookie))
+// }
