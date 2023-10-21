@@ -42,10 +42,15 @@ uplはカレントディレクトリにある "upload.zip" という名前のフ
 		return ArgumentCountError
 	}
 	baseurl := args[1]
+
+	anim(cli.Out)
+
 	task := upl.NewTask(cli.Out, upl.TaskWithBaseurl(baseurl))
 	err := task.Exec()
 	if err != nil {
 		return err
 	}
+
+	fmt.Fprintln(cli.Out, "")
 	return nil
 }
