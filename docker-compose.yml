@@ -9,3 +9,12 @@ services:
       - .:/data
     ports:
       - 7777:80
+
+  win:
+    image: mcr.microsoft.com/powershell:latest
+    working_dir: /work
+    volumes:
+      - .:/work
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: /bin/sh
