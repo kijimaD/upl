@@ -42,6 +42,8 @@ func (t *Task) login() (string, error) {
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
+	// クッキーがセットされてない状態で認証リクエストを送っても失敗する
+	// まずクッキーを生成+セットしてから認証リクエストを送る
 	cookie, err := t.getCookie()
 	if err != nil {
 		return "", err
