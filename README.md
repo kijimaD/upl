@@ -18,12 +18,12 @@ $ go install github.com/kijimaD/upl@main
 $ docker-compose up -d
 ```
 
-実行。カレントディレクトリにある `upload.zip` を指定パスにある Tiny File Manager にアップロードする。
+実行。カレントディレクトリにある `upload.zip` を、指定パスにある Tiny File Manager にアップロードする。
 
 ```
 $ upl localhost:7777
-######################################################################## 100.0%
 ```
+( http://localhost:7777 で Tiny File Managerにアクセスできているものとする。)
 
 ## docker run
 
