@@ -34,6 +34,7 @@ type Task struct {
 	baseurl   string
 	adminuser string
 	pwd       string
+	destpath  string
 }
 
 func NewTask(w io.Writer, options ...TaskOption) *Task {
@@ -43,6 +44,7 @@ func NewTask(w io.Writer, options ...TaskOption) *Task {
 		baseurl:   DEFAULT_BASEURL,
 		adminuser: DEFAULT_ADMINUSER,
 		pwd:       DEFAULT_PWD,
+		destpath:  ".",
 	}
 	for _, option := range options {
 		option(&task)
@@ -65,6 +67,12 @@ func TaskWithLoginUser(adminuser string, pwd string) TaskOption {
 	}
 }
 
+func TaskWithDestpath(destpath string) TaskOption {
+	return func(t *Task) {
+		t.destpath = destpath
+	}
+}
+
 func (t *Task) upload(cookie string) error {
 	file, err := os.Open(UPLOAD_TARGET)
 	if err != nil {
@@ -78,7 +86,7 @@ func (t *Task) upload(cookie string) error {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	writer.SetBoundary(boundary)
-	writer.WriteField("p", "")
+	writer.WriteField("p", t.destpath)
 	writer.WriteField("fullpath", UPLOAD_TARGET)
 	partHeader := make(textproto.MIMEHeader)
 	partHeader.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file"; filename="%s"`, UPLOAD_TARGET))
