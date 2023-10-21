@@ -8,14 +8,16 @@ import (
 
 var marks = []string{"|", "/", "-", "\\"}
 
+const animLoopMilliseconds = 100
+
 func mark(i int) string {
-	return marks[i%4]
+	return marks[i%len(marks)]
 }
 
 func anim(w io.Writer) {
 	go func() {
 		i := 0
-		for range time.Tick(100 * time.Millisecond) {
+		for range time.Tick(animLoopMilliseconds * time.Millisecond) {
 			if i == len(marks) {
 				i = 0
 			}
