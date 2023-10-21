@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os/exec"
-	"regexp"
-	"runtime"
 	"strings"
 )
 
@@ -16,51 +13,9 @@ const (
 	PWD        = "admin@123"
 )
 
-func (t *Task) buildLogin() string {
-	basecmds := []string{
-		"%s",
-		"%s",
-		"-s",
-		"-c -",
-		"-H 'Content-Type: application/x-www-form-urlencoded'",
-		"--data-raw 'fm_usr=%s&fm_pwd=%s'",
-	}
-	basecmd := strings.Join(basecmds, " ")
-	cmd := fmt.Sprintf(basecmd,
-		COMMAND,
-		t.baseurl,
-		ADMIN_USER,
-		PWD,
-	)
-	return cmd
-}
-
-// cookie jar textを返す
-func (t *Task) login() (string, error) {
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("powershell", "-Command", t.buildLogin())
-	default: // Linux & Mac
-		cmd = exec.Command("sh", "-c", t.buildLogin())
-	}
-	login, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Fprint(t.w, string(login), err)
-		return "", err
-	}
-	return string(login), nil
-}
-
-func (t *Task) parseCookie(in string) (string, error) {
-	re, _ := regexp.Compile("\tfilemanager\t([0-9a-zA-Z]+)")
-	ans := re.FindAllStringSubmatch(in, -1)
-	return ans[0][1], nil
-}
-
 // クッキーを生成する
 func (t *Task) getCookie() (string, error) {
-	req, err := http.NewRequest("POST", "http://localhost:7777/index.php?p=", nil)
+	req, err := http.NewRequest("GET", t.baseurl, nil)
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
@@ -80,12 +35,12 @@ func (t *Task) getCookie() (string, error) {
 }
 
 // 生成したクッキーでログインする
-func (t *Task) login2() (string, error) {
+func (t *Task) login() (string, error) {
 	values := url.Values{}
-	values.Add("fm_usr", "admin")
-	values.Add("fm_pwd", "admin@123")
+	values.Add("fm_usr", ADMIN_USER)
+	values.Add("fm_pwd", PWD)
 
-	req, err := http.NewRequest("POST", "http://localhost:7777/index.php?p=", strings.NewReader(values.Encode()))
+	req, err := http.NewRequest("POST", t.baseurl, strings.NewReader(values.Encode()))
 	if err != nil {
 		return "", err
 	}
@@ -109,8 +64,7 @@ func (t *Task) login2() (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-
-	if resp.Status != "200 OK" {
+	if resp.StatusCode != http.StatusOK {
 		return "", errors.New("ログインが成功しなかった")
 	}
 

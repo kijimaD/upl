@@ -101,11 +101,7 @@ func (t *Task) Exec() error {
 	if err != nil {
 		return TargetFileNotFoundError
 	}
-	str, err := t.login()
-	if err != nil {
-		return err
-	}
-	cookie, err := t.parseCookie(str)
+	cookie, err := t.login()
 	if err != nil {
 		return err
 	}
