@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	ArgumentCountError = errors.New("引数の数が間違っている。expect: 1")
+	ArgumentCountError = errors.New("引数の数が間違っている。expect: 2")
 )
 
 type CLI struct {
@@ -38,14 +38,19 @@ uplはカレントディレクトリにある "upload.zip" という名前のフ
 		return nil
 	}
 
-	if len(args) != 2 {
+	if len(args) != 3 {
 		return ArgumentCountError
 	}
 	baseurl := args[1]
+	destpath := args[2]
 
 	anim(cli.Out)
 
-	task := upl.NewTask(cli.Out, upl.TaskWithBaseurl(baseurl))
+	task := upl.NewTask(
+		cli.Out,
+		upl.TaskWithBaseurl(baseurl),
+		upl.TaskWithDestpath(destpath),
+	)
 	err := task.Exec()
 	if err != nil {
 		return err
