@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"os"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestUpload(t *testing.T) {
@@ -21,9 +19,8 @@ func TestUpload(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	resp, err := task.upload(cookie)
+	err = task.upload(cookie)
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, `{"status":"success","info":"file upload successful"}`, resp)
 }

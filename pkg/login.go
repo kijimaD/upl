@@ -3,6 +3,7 @@ package upl
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -44,8 +45,6 @@ func (t *Task) login() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("User-Agent", "Go/1.20")
-	req.Header.Add("Accept", "*/*")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	cookie, err := t.getCookie()
@@ -65,7 +64,15 @@ func (t *Task) login() (string, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("ログインが成功しなかった")
+		return "", errors.New("ログイン実行結果のステータスが200ではなかった")
+	}
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	// Sign Inが表示されているということはログイン画面にいる
+	if strings.Contains(string(b), "Sign in") {
+		return "", errors.New("ユーザー認証が成功しなかった")
 	}
 
 	// dump1, _ := httputil.DumpRequest(req, true)

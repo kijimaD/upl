@@ -47,10 +47,10 @@ func TaskWithBaseurl(baseurl string) TaskOption {
 	}
 }
 
-func (t *Task) upload(cookie string) (string, error) {
+func (t *Task) upload(cookie string) error {
 	file, err := os.Open(UPLOAD_TARGET)
 	if err != nil {
-		return "", TargetFileNotFoundError
+		return TargetFileNotFoundError
 	}
 	defer file.Close()
 
@@ -67,7 +67,7 @@ func (t *Task) upload(cookie string) (string, error) {
 	partHeader.Set("Content-Type", "application/zip")
 	part, err := writer.CreatePart(partHeader)
 	if err != nil {
-		return "", err
+		return err
 	}
 	_, err = io.Copy(part, file)
 	writer.Close()
@@ -75,7 +75,7 @@ func (t *Task) upload(cookie string) (string, error) {
 	// リクエストを作成
 	req, err := http.NewRequest("POST", t.baseurl, body)
 	if err != nil {
-		return "", err
+		return err
 	}
 	req.Header.Set("Cookie", fmt.Sprintf("filemanager=%s", cookie))
 	req.Header.Set("Content-Type", "multipart/form-data; boundary="+boundary)
@@ -85,15 +85,18 @@ func (t *Task) upload(cookie string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer resp.Body.Close()
 
 	bodyText, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return string(bodyText), nil
+	if string(bodyText) != `{"status":"success","info":"file upload successful"}` {
+		return errors.New("アップロードが成功レスポンスを返却しなかった")
+	}
+	return nil
 }
 
 func (t *Task) Exec() error {
@@ -105,7 +108,7 @@ func (t *Task) Exec() error {
 	if err != nil {
 		return err
 	}
-	_, err = t.upload(cookie)
+	err = t.upload(cookie)
 	if err != nil {
 		return err
 	}
