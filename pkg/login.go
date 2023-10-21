@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-const (
-	ADMIN_USER = "admin"
-	PWD        = "admin@123"
-)
-
 // クッキーを生成する
 func (t *Task) getCookie() (string, error) {
 	req, err := http.NewRequest("GET", t.baseurl, nil)
@@ -38,8 +33,8 @@ func (t *Task) getCookie() (string, error) {
 // 生成したクッキーでログインする
 func (t *Task) login() (string, error) {
 	values := url.Values{}
-	values.Add("fm_usr", ADMIN_USER)
-	values.Add("fm_pwd", PWD)
+	values.Add("fm_usr", t.adminuser)
+	values.Add("fm_pwd", t.pwd)
 
 	req, err := http.NewRequest("POST", t.baseurl, strings.NewReader(values.Encode()))
 	if err != nil {
@@ -72,7 +67,7 @@ func (t *Task) login() (string, error) {
 	}
 	// Sign Inが表示されているということはログイン画面にいる
 	if strings.Contains(string(b), "Sign in") {
-		return "", errors.New("ユーザー認証が成功しなかった")
+		return "", FailLoginError
 	}
 
 	// dump1, _ := httputil.DumpRequest(req, true)

@@ -19,19 +19,30 @@ var (
 	UPLOAD_TARGET   = "upload.zip"
 
 	TargetFileNotFoundError = errors.New("カレントディレクトリに upload.zip ファイルが存在しない")
+	FailLoginError          = errors.New("ユーザー認証に失敗した")
+	FailUploadError         = errors.New("アップロードが成功レスポンスを返却しなかった")
+)
+
+const (
+	DEFAULT_ADMINUSER = "admin"
+	DEFAULT_PWD       = "admin@123"
 )
 
 type Task struct {
-	w       io.Writer
-	mu      *sync.RWMutex
-	baseurl string
+	w         io.Writer
+	mu        *sync.RWMutex
+	baseurl   string
+	adminuser string
+	pwd       string
 }
 
 func NewTask(w io.Writer, options ...TaskOption) *Task {
 	task := Task{
-		w:       w,
-		mu:      &sync.RWMutex{},
-		baseurl: DEFAULT_BASEURL,
+		w:         w,
+		mu:        &sync.RWMutex{},
+		baseurl:   DEFAULT_BASEURL,
+		adminuser: DEFAULT_ADMINUSER,
+		pwd:       DEFAULT_PWD,
 	}
 	for _, option := range options {
 		option(&task)
@@ -44,6 +55,13 @@ type TaskOption func(*Task)
 func TaskWithBaseurl(baseurl string) TaskOption {
 	return func(t *Task) {
 		t.baseurl = baseurl
+	}
+}
+
+func TaskWithLoginUser(adminuser string, pwd string) TaskOption {
+	return func(t *Task) {
+		t.adminuser = adminuser
+		t.pwd = pwd
 	}
 }
 
@@ -94,7 +112,7 @@ func (t *Task) upload(cookie string) error {
 		return err
 	}
 	if string(bodyText) != `{"status":"success","info":"file upload successful"}` {
-		return errors.New("アップロードが成功レスポンスを返却しなかった")
+		return FailUploadError
 	}
 	return nil
 }

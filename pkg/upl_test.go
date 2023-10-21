@@ -24,3 +24,19 @@ func TestUpload(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestUploadFail(t *testing.T) {
+	file, err := os.Create(UPLOAD_TARGET)
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.Remove(file.Name())
+
+	b := &bytes.Buffer{}
+	task := NewTask(b)
+	err = task.upload("invalid cookie")
+	// クッキーが無効だと失敗する
+	if err != FailUploadError {
+		t.Error(err)
+	}
+}
